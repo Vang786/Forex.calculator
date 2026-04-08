@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX TERMINAL | Enterprise Risk Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --panel: #0f172a;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Neumorphic Glass Effect */
+        .card-pro {
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .input-field {
+            background: rgba(2, 6, 23, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        /* Custom Table Design */
+        .pro-table th {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Animated Gauge */
+        .gauge-container {
+            width: 100%;
+            height: 8px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .gauge-fill {
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Animations */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-ui { animation: slideIn 0.4s ease forwards; }
+
+        /* Hide Arrows on Number Input */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .btn-action {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+        }
+
+        .btn-action:active { transform: scale(0.96); }
+    </style>
+</head>
+<body class="p-6 md:p-10">
+
+    <div class="max-w-[1400px] mx-auto">
+        
+        <header class="flex justify-between items-center mb-10">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/40">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight leading-none">APEX<span class="text-blue-500">TERMINAL</span></h1>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Institutional Position Engine</p>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8 bg-slate-900/50 p-4 rounded-2xl border border-white/5">
+                <div class="text-right">
+                    <span class="text-[9px] text-slate-500 block uppercase font-bold">Latency</span>
+                    <span class="mono text-xs text-emerald-400">0.4ms</span>
+                </div>
+                <div class="w-px h-8 bg-slate-800"></div>
+                <div class="text-right">
+                    <span class="text-[9px] text-slate-500 block uppercase font-bold">System Time</span>
+                    <span id="liveClock" class="mono text-xs text-blue-400">00:00:00</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-4 space-y-6 animate-ui">
+                <div class="card-pro p-8">
+                    <h3 class="text-sm font-bold mb-8 flex items-center gap-3">
+                        <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
+                        TRADE PARAMETERS
+                    </h3>
+
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase block mb-2">Account Equity</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3.5 text-slate-600 text-xs">$</span>
+                                    <input type="number" id="inp-balance" value="10000" class="input-field w-full p-3 pl-7 rounded-xl text-sm font-bold mono">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase block mb-2">Max Leverage</label>
+                                <select id="inp-leverage" class="input-field w-full p-3 rounded-xl text-sm font-bold cursor-pointer">
+                                    <option value="30">1:30</option>
+                                    <option value="50">1:50</option>
+                                    <option value="100" selected>1:100</option>
+                                    <option value="500">1:500</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-2">Trading Asset</label>
+                            <select id="inp-asset" class="input-field w-full p-4 rounded-xl text-sm font-bold cursor-pointer">
+                                <optgroup label="Forex Majors ($10/pip)">
+                                    <option value="10">EUR/USD</option>
+                                    <option value="10">GBP/USD</option>
+                                    <option value="10">AUD/USD</option>
+                                </optgroup>
+                                <optgroup label="Yen Crosses ($9.2/pip)">
+                                    <option value="9.2">USD/JPY</option>
+                                    <option value="9.2">EUR/JPY</option>
+                                </optgroup>
+                                <optgroup label="Commodities">
+                                    <option value="10">XAU/USD (Gold)</option>
+                                    <option value="1">XAG/USD (Silver)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase block mb-2">Risk per Trade (%)</label>
+                                <input type="number" id="inp-risk-p" value="1.0" step="0.1" class="input-field w-full p-3 rounded-xl text-sm font-bold mono text-blue-400">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase block mb-2">Stop Loss (Pips)</label>
+                                <input type="number" id="inp-sl-pips" value="20" class="input-field w-full p-3 rounded-xl text-sm font-bold mono text-red-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-2">Take Profit Ratio (RR)</label>
+                            <div class="flex items-center gap-4 bg-slate-900/50 p-2 rounded-xl border border-white/5">
+                                <input type="range" id="inp-rr-slider" min="1" max="10" step="0.5" value="2" class="flex-1 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                                <span id="rr-val" class="mono text-blue-400 font-bold w-14 text-center">1:2.0</span>
+                            </div>
+                        </div>
+
+                        <button id="btn-sync" class="btn-action w-full py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] text-white">
+                            Synchronize Calculations
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-blue-500/10 border border-blue-500/20 p-5 rounded-2xl flex gap-4">
+                    <div class="text-blue-500 mt-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <p class="text-[10px] text-blue-200/60 leading-relaxed uppercase font-bold">
+                        Sizing is calculated based on Standard Lot size (100,000 units). Ensure your broker uses standard contract specifications.
+                    </p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 space-y-8 animate-ui" style="animation-delay: 0.1s;">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card-pro p-6 border-b-4 border-b-blue-600">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Recommended Lot</span>
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <h2 id="out-lot" class="text-5xl font-black mono tracking-tighter">0.50</h2>
+                            <span class="text-xs font-bold text-slate-600 uppercase">Std</span>
+                        </div>
+                        <div class="gauge-container"><div id="gauge-lot" class="gauge-fill bg-blue-600" style="width: 50%"></div></div>
+                    </div>
+
+                    <div class="card-pro p-6 border-b-4 border-b-red-600">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Risk Amount</span>
+                        <div class="flex items-baseline gap-1 mt-2">
+                            <h2 id="out-risk-cash" class="text-4xl font-black mono text-red-500">-$100.00</h2>
+                        </div>
+                        <p id="out-impact" class="text-[9px] text-slate-600 font-bold mt-2 uppercase">Equity Impact: -1.0%</p>
+                    </div>
+
+                    <div class="card-pro p-6 border-b-4 border-b-emerald-600">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Potential Profit</span>
+                        <div class="flex items-baseline gap-1 mt-2">
+                            <h2 id="out-profit-cash" class="text-4xl font-black mono text-emerald-500">+$200.00</h2>
+                        </div>
+                        <p id="out-final-equity" class="text-[9px] text-slate-600 font-bold mt-2 uppercase">Est. End Balance: $10,200</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="card-pro overflow-hidden">
+                        <div class="p-6 bg-white/5 border-b border-white/5">
+                            <h3 class="text-xs font-bold uppercase tracking-widest">Reward Scalability Matrix</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full pro-table text-left">
+                                <thead>
+                                    <tr>
+                                        <th>Target RR</th>
+                                        <th>Profit ($)</th>
+                                        <th class="text-right">Return %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rr-matrix-body" class="mono text-xs">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-pro p-6">
+                        <h3 class="text-xs font-bold uppercase tracking-widest mb-6">Position Scaling (Partial Exit)</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center bg-slate-900/40 p-3 rounded-xl border border-white/5">
+                                <span class="text-[10px] font-bold text-slate-500">TP 1 (50% Volume)</span>
+                                <span id="tp-1" class="text-xs font-bold mono text-emerald-400">0.25 Lot</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-900/40 p-3 rounded-xl border border-white/5">
+                                <span class="text-[10px] font-bold text-slate-500">TP 2 (30% Volume)</span>
+                                <span id="tp-2" class="text-xs font-bold mono text-emerald-400">0.15 Lot</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-900/40 p-3 rounded-xl border border-white/5">
+                                <span class="text-[10px] font-bold text-slate-500">TP 3 (20% Volume)</span>
+                                <span id="tp-3" class="text-xs font-bold mono text-emerald-400">0.10 Lot</span>
+                            </div>
+                            <div class="mt-4 p-3 bg-blue-600/5 rounded-xl border border-blue-500/10">
+                                <p class="text-[9px] text-blue-400 font-bold uppercase italic">Recommended for High Volatility Pairs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-pro p-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-600 uppercase block mb-1">Pip Value</span>
+                        <span id="stat-pip-val" class="mono text-sm font-bold">$5.00</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-600 uppercase block mb-1">Notional Value</span>
+                        <span id="stat-notional" class="mono text-sm font-bold">$50,000</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-600 uppercase block mb-1">Margin Required</span>
+                        <span id="stat-margin" class="mono text-sm font-bold">$500.00</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] font-bold text-slate-600 uppercase block mb-1">Units Cont.</span>
+                        <span id="stat-units" class="mono text-sm font-bold">50,000</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="mt-16 text-center">
+            <p class="text-[10px] text-slate-700 font-black uppercase tracking-[0.8em]">End of Transmission // Apex Risk Engine</p>
+        </footer>
+    </div>
+
+    <script>
+        /**
+         * APEX RISK ENGINE CORE v4.0
+         * "Programming at its finest"
+         */
+
+        const Terminal = {
+            // UI State Mapping
+            UI: {
+                balance: document.getElementById('inp-balance'),
+                asset: document.getElementById('inp-asset'),
+                riskP: document.getElementById('inp-risk-p'),
+                slPips: document.getElementById('inp-sl-pips'),
+                rrSlider: document.getElementById('inp-rr-slider'),
+                leverage: document.getElementById('inp-leverage'),
+                
+                // Displays
+                rrValLabel: document.getElementById('rr-val'),
+                lotOut: document.getElementById('out-lot'),
+                riskCash: document.getElementById('out-risk-cash'),
+                profitCash: document.getElementById('out-profit-cash'),
+                impactLabel: document.getElementById('out-impact'),
+                finalEquity: document.getElementById('out-final-equity'),
+                
+                // Secondary Stats
+                pipVal: document.getElementById('stat-pip-val'),
+                notional: document.getElementById('stat-notional'),
+                margin: document.getElementById('stat-margin'),
+                units: document.getElementById('stat-units'),
+                
+                // Scaling
+                tp1: document.getElementById('tp-1'),
+                tp2: document.getElementById('tp-2'),
+                tp3: document.getElementById('tp-3'),
+                
+                // Matrix
+                matrix: document.getElementById('rr-matrix-body'),
+                gauge: document.getElementById('gauge-lot')
+            },
+
+            init() {
+                // Attach Event Listeners
+                const inputs = [this.UI.balance, this.UI.asset, this.UI.riskP, this.UI.slPips, this.UI.rrSlider, this.UI.leverage];
+                inputs.forEach(el => el.addEventListener('input', () => this.engineCompute()));
+                
+                document.getElementById('btn-sync').addEventListener('click', () => {
+                    this.engineCompute();
+                    this.playPulseEffect();
+                });
+
+                // Clock Start
+                setInterval(() => {
+                    document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('id-ID', { hour12: false });
+                }, 1000);
+
+                this.engineCompute();
+            },
+
+            engineCompute() {
+                // 1. Data Sanitization
+                const balance = parseFloat(this.UI.balance.value) || 0;
+                const riskP = parseFloat(this.UI.riskP.value) || 0;
+                const slPips = parseFloat(this.UI.slPips.value) || 0;
+                const rr = parseFloat(this.UI.rrSlider.value) || 0;
+                const pipValueBase = parseFloat(this.UI.asset.value); // Misal $10/pip utk 1 Lot
+                const lev = parseInt(this.UI.leverage.value);
+
+                if (balance <= 0 || slPips <= 0) return this.resetDisplay();
+
+                // 2. Position Size Logic (The Core)
+                // Formula: Lot = (Equity * Risk%) / (SL * PipValue)
+                const riskCash = balance * (riskP / 100);
+                const rawLot = riskCash / (slPips * pipValueBase);
+                const lot = Math.floor(rawLot * 100) / 100; // Floor 2 desimal
+
+                const profitCash = riskCash * rr;
+
+                // 3. UI Primary Sync
+                this.UI.rrValLabel.innerText = `1:${rr.toFixed(1)}`;
+                this.UI.lotOut.innerText = lot.toFixed(2);
+                this.UI.riskCash.innerText = `-$${riskCash.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                this.UI.profitCash.innerText = `+$${profitCash.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                this.UI.impactLabel.innerText = `Equity Impact: -${riskP}%`;
+                this.UI.finalEquity.innerText = `Est. End Balance: $${(balance + profitCash).toLocaleString()}`;
+
+                // 4. Position Scaling Logic
+                this.UI.tp1.innerText = `${(lot * 0.5).toFixed(2)} Lot`;
+                this.UI.tp2.innerText = `${(lot * 0.3).toFixed(2)} Lot`;
+                this.UI.tp3.innerText = `${(lot * 0.2).toFixed(2)} Lot`;
+
+                // 5. Margin & Exposure HUD
+                const notional = lot * 100000;
+                const margin = notional / lev;
+                this.UI.stat_pip_val = (lot * pipValueBase).toFixed(2);
+                
+                document.getElementById('stat-pip-val').innerText = `$${this.UI.stat_pip_val}`;
+                document.getElementById('stat-notional').innerText = `$${notional.toLocaleString()}`;
+                document.getElementById('stat-margin').innerText = `$${margin.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                document.getElementById('stat-units').innerText = (lot * 100000).toLocaleString();
+
+                // 6. Visual Gauge Logic
+                const gaugeWidth = Math.min((lot / 2) * 100, 100); // Max gauge scale 2.0 Lots
+                this.UI.gauge.style.width = `${gaugeWidth}%`;
+                this.UI.gauge.style.backgroundColor = lot > 1.0 ? 'var(--warning)' : 'var(--accent)';
+
+                // 7. Matrix Generation
+                this.buildMatrix(riskCash, balance);
+            },
+
+            buildMatrix(riskCash, balance) {
+                const ratios = [1, 1.5, 2, 3, 4, 5];
+                this.UI.matrix.innerHTML = '';
+
+                ratios.forEach(r => {
+                    const profit = riskCash * r;
+                    const roi = (profit / balance) * 100;
+                    
+                    const row = document.createElement('tr');
+                    row.className = "border-b border-white/5 hover:bg-white/[0.02] transition";
+                    row.innerHTML = `
+                        <td class="p-4 font-bold text-slate-400 italic">RR 1:${r}</td>
+                        <td class="p-4 font-bold text-emerald-400">$${profit.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td class="p-4 text-right">
+                            <span class="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded text-[10px] font-bold">+${roi.toFixed(2)}%</span>
+                        </td>
+                    `;
+                    this.UI.matrix.appendChild(row);
+                });
+            },
+
+            resetDisplay() {
+                this.UI.lotOut.innerText = "0.00";
+                this.UI.riskCash.innerText = "-$0.00";
+                this.UI.profitCash.innerText = "+$0.00";
+                this.UI.gauge.style.width = "0%";
+            },
+
+            playPulseEffect() {
+                const hud = document.getElementById('out-lot');
+                hud.style.transition = 'transform 0.1s';
+                hud.style.transform = 'scale(1.1)';
+                setTimeout(() => hud.style.transform = 'scale(1)', 100);
+            }
+        };
+
+        // Execution Entry Point
+        document.addEventListener('DOMContentLoaded', () => Terminal.init());
+
+    </script>
+</body>
+</html>
